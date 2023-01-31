@@ -152,7 +152,7 @@ NVCC          := $(CUDA_PATH)/bin/nvcc -ccbin $(HOST_COMPILER)
 
 # internal flags
 NVCCFLAGS   := -m${TARGET_SIZE} -std=c++14
-CCFLAGS     := -std=c++14 -O0 \"-Wl,-rpath,./cnpy_lib/lib\"
+CCFLAGS     := -std=c++14 -Ofast \"-Wl,-rpath,./cnpy_lib/lib\"
 LDFLAGS     :=
 
 # build flags
