@@ -16,7 +16,7 @@ First, be sure to install all dependencies. In Ubuntu:
 ```bash
 sudo apt-get update
 sudo apt-get install python3 python3-dev python3-pip
-sudo apt-get install nvidia-cuda-toolkit # replace `nvidia-cuda-toolkit` with `nvidia-headless-510` for headless CUDA install
+sudo apt-get install nvidia-cuda-toolkit # replace `nvidia-cuda-toolkit` with `nvidia-headless-525` for headless CUDA install
 ```
 
 Then, to install `homs-tc`:
