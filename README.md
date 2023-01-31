@@ -21,7 +21,7 @@ sudo apt-get install python3 python3-dev python3-pip
 Then, to install `homs-tc`:
 
 ```bash
-git clone https://github.com/tycheyoung/homs-tc.git
+git clone --recurse-submodules https://github.com/tycheyoung/homs-tc.git
 cd homs-tc
 ./install.sh
 ```
