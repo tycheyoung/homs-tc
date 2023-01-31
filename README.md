@@ -19,7 +19,7 @@ We recommend installing _HOMS-TC_ via docker using the following command:
 ```bash
 git clone --recurse-submodules https://github.com/tycheyoung/homs-tc.git
 cd homs-tc
-docker build --no-cache -f ./docker/Dockerfile -t homs_tc .
+docker build -f ./docker/Dockerfile -t homs_tc .
 docker run --gpus all -it homs_tc /bin/bash  # Make sure to mount dataset folder
 ```
 
