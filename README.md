@@ -11,8 +11,18 @@ _HOMS-TC_ requires `Python 3.8+` with `CUDA v11+` environment. A NVIDIA GPU with
 Installation
 ------------------------------------------------------
 
+First, be sure to install all dependencies. In Ubuntu:
+
 ```bash
-git clone https://github.com/UCSD-SEELab/homs-tc
+sudo apt-get update
+sudo apt-get install python3 python3-dev python3-pip nvidia-cuda-toolkit
+```
+
+Then, to install `homs-tc`:
+
+```bash
+git clone --recurse-submodules https://github.com/tycheyoung/homs-tc.git
+cd homs-tc
 ./install.sh
 ```
 

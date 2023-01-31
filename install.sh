@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # For Cython
 pip3 install -r requirements.txt --upgrade
