@@ -15,8 +15,7 @@ First, be sure to install all dependencies. In Ubuntu:
 
 ```bash
 sudo apt-get update
-sudo apt-get install python3 python3-dev python3-pip
-sudo apt-get install nvidia-cuda-toolkit
+sudo apt-get install python3 python3-dev python3-pip nvidia-cuda-toolkit
 ```
 
 Then, to install `homs-tc`:
