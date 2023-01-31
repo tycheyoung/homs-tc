@@ -6,7 +6,7 @@ int8main
 *.csv
 *.bin
 .vscode/
-bin/
+bin/*.o
 dataset/
 .vscode/settings.json
 *.pdf
