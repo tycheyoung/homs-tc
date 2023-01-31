@@ -11,12 +11,28 @@ _HOMS-TC_ requires `Python 3.8+` with `CUDA v11+` environment. A NVIDIA GPU with
 Installation
 ------------------------------------------------------
 
-First, be sure to install all dependencies. In Ubuntu:
+Install via Docker
+*********************
+
+We recommend installing _HOMS-TC_ via docker using the following command:
+
+```bash
+git clone --recurse-submodules https://github.com/tycheyoung/homs-tc.git
+cd homs-tc
+docker build --no-cache -f ./docker/Dockerfile -t homs_tc .
+docker run --gpus all -it homs_tc /bin/bash  # Make sure to mount dataset folder
+```
+
+Install from Source
+*********************
+First, be sure to install all dependencies (Python and CUDA). In Ubuntu:
 
 ```bash
 sudo apt-get update
-sudo apt-get install python3 python3-dev python3-pip nvidia-cuda-toolkit
+sudo apt-get install python3 python3-dev python3-pip 
+sudo apt-get install nvidia-cuda-toolkit  # This will install the latest version of CUDA. Read below before proceed
 ```
+For CUDA installation, refer to the documentation [\[LINK\]](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html) to install a specific version.
 
 Then, to install `homs-tc`:
 
@@ -73,6 +89,11 @@ See `configs/iprg2012.ini` for the example config file. All parameters should be
   - fdr_tolerance_mass: the bin width to group SSMs for subgroup FDR calculation during the second stage of the cascade search.
   - fdr_tolerance_mode: the unit of `fdr_tolerance_mass`. Can be either `Da` or `ppm`
   - fdr_min_group_size: the minimum group size to perform FDR control individually for that subgroup.
+
+Troubleshooting
+----
+1. Make sure to add the proper [SM](https://arnon.dk/matching-sm-architectures-arch-and-gencode-for-various-nvidia-cards/) of your GPU in Makefile [\[LINK\]](https://github.com/tycheyoung/homs-tc/blob/main/Makefile#L236).
+By default, `sm_89` and `sm_86` is enabled.
 
 Contact
 ------------------------------------------------------

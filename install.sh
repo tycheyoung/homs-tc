@@ -14,4 +14,5 @@ make install
 
 # For CUDA binary
 cd ../..
+mkdir -p bin
 make all
