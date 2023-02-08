@@ -150,7 +150,6 @@ int main(int argc, char * argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    std::vector<float> bases;  // flattened
     std::vector<float> base_v1(D/2, 1);
     std::vector<float> base_v2(D/2, -1);
     base_v1.insert(base_v1.end(), base_v2.begin(), base_v2.end());
@@ -217,7 +216,7 @@ int main(int argc, char * argv[]) {
     float* d_vectorized_ref_intensities = NULL;
     int* d_vectorized_ref_index = NULL;
     unsigned int* d_csr_info;
-    if (!use_precomputed_ref_hvs) {
+    if (!use_precomputed_ref_hvs || (use_precomputed_ref_hvs && dump_ref_hvs)) {
         HANDLE_ERROR(cudaMalloc((void **)&d_csr_info, N * sizeof(unsigned int)));
         HANDLE_ERROR(cudaMalloc((void **)&d_vectorized_ref_intensities, vectorized_ref_intensities.size() * sizeof(float)));
         HANDLE_ERROR(cudaMalloc((void **)&d_vectorized_ref_index, vectorized_ref_index.size() * sizeof(int)));
@@ -325,9 +324,27 @@ int main(int argc, char * argv[]) {
                                                             N_batch, Q, D, ref_batch_size, ref_batch_num * BATCH_SPLIB_SIZE,
                                                             processed_ref_batch_size);
             #endif
+        } else { // use_precomputed_ref_hvs is True
             if (dump_ref_hvs) {
+                #ifdef USE_HALF
+                encodeLevelIdSparse_fp16_soa<<<encodeSplibDim, nBlock>>>(d_level_hvs_packed, d_id_hvs, d_vectorized_ref_index_batch, d_vectorized_ref_intensities_batch, d_csr_info, d_hv_matrix,
+                                                                N_batch, Q, D, ref_batch_size, ref_batch_num * BATCH_SPLIB_SIZE,
+                                                                processed_ref_batch_size);
+                #endif
+
+                #ifdef USE_FLOAT
+                encodeLevelIdSparse_fp32_soa<<<encodeSplibDim, nBlock>>>(d_level_hvs_packed, d_id_hvs, d_vectorized_ref_index_batch, d_vectorized_ref_intensities_batch, d_csr_info, d_hv_matrix,
+                                                                N_batch, Q, D, ref_batch_size, ref_batch_num * BATCH_SPLIB_SIZE,
+                                                                processed_ref_batch_size);
+                #endif
+
+                #ifdef USE_INT8
+                encodeLevelIdSparse_int8_soa<<<encodeSplibDim, nBlock>>>(d_level_hvs_packed, d_id_hvs, d_vectorized_ref_index_batch, d_vectorized_ref_intensities_batch, d_csr_info, d_hv_matrix,
+                                                                N_batch, Q, D, ref_batch_size, ref_batch_num * BATCH_SPLIB_SIZE,
+                                                                processed_ref_batch_size);
+                #endif
                 std::string dump_fname = fs + "_hvs_d" + std::to_string(D) +  "_c" + splibcharge + "_B" \
-                                         + std::to_string(BATCH_SPLIB_SIZE) + "_" + std::to_string(ref_batch_num) + ".bin";
+                                        + std::to_string(BATCH_SPLIB_SIZE) + "_" + std::to_string(ref_batch_num) + ".bin";
                 std::cout << "save reference HVs to " << dump_fname << std::endl;
                 #ifdef USE_HALF
                 __half* hv_matrix = (__half*)malloc(D * N_batch * sizeof(__half));
@@ -347,30 +364,30 @@ int main(int argc, char * argv[]) {
                 saveArr<int8_t>(dump_fname, hv_matrix, D * N_batch);
                 free(hv_matrix);
                 #endif
+            } else {
+                // Load precomputed ref hv
+                std::string dump_fname = fs + "_hvs_d" + std::to_string(D) +  "_c" + splibcharge + "_B" \
+                                        + std::to_string(BATCH_SPLIB_SIZE) + "_" + std::to_string(ref_batch_num) + ".bin";
+                std::cout << "load precomputed reference HVs from " << dump_fname << std::endl;
+                #ifdef USE_HALF
+                __half* hv_matrix = (__half*)malloc(D * N_batch * sizeof(__half));
+                loadArr<half>(dump_fname, hv_matrix, D * N_batch);
+                HANDLE_ERROR(cudaMemcpy(d_hv_matrix, hv_matrix, D * N_batch * sizeof(__half), cudaMemcpyHostToDevice));
+                free(hv_matrix);
+                #endif
+                #ifdef USE_FLOAT
+                float* hv_matrix = (float*)malloc(D * N_batch * sizeof(float));
+                loadArr<float>(dump_fname, hv_matrix, D * N_batch);
+                HANDLE_ERROR(cudaMemcpy(d_hv_matrix, hv_matrix, D * N_batch * sizeof(float), cudaMemcpyHostToDevice));
+                free(hv_matrix);
+                #endif
+                #ifdef USE_INT8
+                int8_t* hv_matrix = (int8_t*)malloc(D * N_batch * sizeof(int8_t));
+                loadArr<int8_t>(dump_fname, hv_matrix, D * N_batch);  // TOOD: error exception
+                HANDLE_ERROR(cudaMemcpy(d_hv_matrix, hv_matrix, D * N_batch * sizeof(int8_t), cudaMemcpyHostToDevice));
+                free(hv_matrix);
+                #endif
             }
-        } else {
-            // Load precomputed ref hv
-            std::string dump_fname = fs + "_hvs_d" + std::to_string(D) +  "_c" + splibcharge + "_B" \
-                                     + std::to_string(BATCH_SPLIB_SIZE) + "_" + std::to_string(ref_batch_num) + ".bin";
-            std::cout << "load precomputed reference HVs from " << dump_fname << std::endl;
-            #ifdef USE_HALF
-            __half* hv_matrix = (__half*)malloc(D * N_batch * sizeof(__half));
-            loadArr<half>(dump_fname, hv_matrix, D * N_batch);
-            HANDLE_ERROR(cudaMemcpy(d_hv_matrix, hv_matrix, D * N_batch * sizeof(__half), cudaMemcpyHostToDevice));
-            free(hv_matrix);
-            #endif
-            #ifdef USE_FLOAT
-            float* hv_matrix = (float*)malloc(D * N_batch * sizeof(float));
-            loadArr<float>(dump_fname, hv_matrix, D * N_batch);
-            HANDLE_ERROR(cudaMemcpy(d_hv_matrix, hv_matrix, D * N_batch * sizeof(float), cudaMemcpyHostToDevice));
-            free(hv_matrix);
-            #endif
-            #ifdef USE_INT8
-            int8_t* hv_matrix = (int8_t*)malloc(D * N_batch * sizeof(int8_t));
-            loadArr<int8_t>(dump_fname, hv_matrix, D * N_batch);  // TOOD: error exception
-            HANDLE_ERROR(cudaMemcpy(d_hv_matrix, hv_matrix, D * N_batch * sizeof(int8_t), cudaMemcpyHostToDevice));
-            free(hv_matrix);
-            #endif
         }
 
         err = cudaGetLastError();
@@ -625,7 +642,7 @@ int main(int argc, char * argv[]) {
     std::cout << splibcharge_i << "," << ref_encode_time << "," << query_encode_time << "," << search_time << "," << time_taken_ms <<  std::endl;
 
     // Free
-    if (!use_precomputed_ref_hvs) {
+    if (!use_precomputed_ref_hvs || (use_precomputed_ref_hvs && dump_ref_hvs)) {
         HANDLE_ERROR(cudaFree(d_csr_info));
         HANDLE_ERROR(cudaFree(d_vectorized_ref_index));
         HANDLE_ERROR(cudaFree(d_vectorized_ref_intensities));
