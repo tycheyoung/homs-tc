@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <iostream>
 
+#include <thrust/execution_policy.h>
 #include <thrust/device_vector.h>
 #include <thrust/transform_reduce.h>
 
