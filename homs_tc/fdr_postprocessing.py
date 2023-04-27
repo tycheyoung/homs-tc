@@ -11,7 +11,7 @@ import numpy as np
 def cuda_output_to_df(cuda_output_fname):
     header_list = ["query_idx", "query_charge", "splib_identifier", "splib_charge", "score"]
     df_dtypes = {"query_idx":np.int32, "query_charge":np.int32, "splib_identifier":np.int64, "splib_charge":np.int32, "score":np.float64}
-    df = pd.read_csv(cuda_output_fname, names=header_list, dtype=df_dtypes, delimiter="\t")
+    df = pd.read_csv(cuda_output_fname, names=header_list, dtype=df_dtypes, delimiter="\t", header=None)
     c_maxes = df.groupby(['query_charge', 'query_idx']).score.transform(max)  # if batched, multiple max found in the subset of ref
     df = df.loc[df.score == c_maxes]
     return df
