@@ -1,7 +1,7 @@
-HOMS-TC: Accelerating Open Modification Spectral Library Searching on Tensor Core in Hyperdimensional Space
+Feeding BER into the HOMS-TC code
 =======================================================
 
-_HOMS-TC_ is an open modification spectral library search (OMS) tool for mass spectrometry-based proteomics. Our tool redesigns the MS/MS spectral matching algorithm based on hyperdimensional computing (HDC) and accelerates OMS on GPU in an end-to-end manner. The software is freely available under the Apache 2.0 license.
+Modify _HOMS-TC_ code to recreate some error results. Bit error rate (BER) comes from RRAM, which might effect the data stored in memory. Initially the code assume 0 BER, I modified the code to inject noise into the encoding phase and observe the differences. To inject BER into the code, I flipped the binary value [-1,1] randomly with 50% of it being 1 and 50% being -1.
 
 System Requirements
 ------------------------------------------------------
@@ -90,17 +90,12 @@ See `configs/iprg2012.ini` for the example config file. All parameters should be
   - fdr_tolerance_mode: the unit of `fdr_tolerance_mass`. Can be either `Da` or `ppm`
   - fdr_min_group_size: the minimum group size to perform FDR control individually for that subgroup.
 
-Troubleshooting
+Result
 ----
-1. Make sure to add the proper [SM](https://arnon.dk/matching-sm-architectures-arch-and-gencode-for-various-nvidia-cards/) of your GPU in Makefile [\[LINK\]](https://github.com/tycheyoung/homs-tc/blob/main/Makefile#L236).
-By default, `sm_89` and `sm_86` is enabled.
+|Run/BER| Run 1 | Run 2 | Run 3 | Run 4 | Run 5 |
+|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
+|  0    | 4289  |  4436 |  4667 |  4508 | 4727  |
+|  0.5  | 4589  | 4675  | 4607  | 4428  | 4713  |
 
-Contact
-------------------------------------------------------
 
-For more information, post an issue or send an email to <j5kang@ucsd.edu>.
 
-Acknowledgements
-------------------------------------------------------
-
-This work was supported in part by Semiconductor Research Corporation (SRC).
